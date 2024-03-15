@@ -7,7 +7,7 @@ interface Enemy {
 }
 
 const TowerDefenseGame: React.FC = () => {
-  const [towerRange, setTowerRange] = useState<number>(0);
+  const [towerRange, setTowerRange] = useState<number>(50);
   const [enemies, setEnemies] = useState<Enemy[]>([]);
   const [turns, setTurns] = useState<number>(0);
   const [gameResult, setGameResult] = useState<string>("");
@@ -31,19 +31,33 @@ const TowerDefenseGame: React.FC = () => {
   };
 
   const handleAddEnemy = () => {
-    const randomName = `Bot${Math.floor(Math.random() * 9) + 1}`;
+    if (enemies.length >= 9) {
+      alert("Вы не можете добавить больше 9 врагов.");
+      return;
+    }
+    let randomName = "";
+    let isUnique = false;
 
+    // Повторяем генерацию имени до тех пор, пока не найдем уникальное
+    while (!isUnique) {
+      randomName = `Bot${Math.floor(Math.random() * 9) + 1}`;
+
+      // Проверяем, существует ли такое имя среди уже добавленных врагов
+      if (!enemies.some((enemy) => enemy.name === randomName)) {
+        isUnique = true;
+      }
+    }
+
+    // Генерация случайной дистанции, кратной 10 от 10 до 150
     const randomDistance = Math.floor(Math.random() * 15) * 10 + 10;
 
+    // Генерация случайной скорости, кратной 5 от 5 до 30
     const randomSpeed = (Math.floor(Math.random() * 6) + 1) * 5;
 
     setEnemies([
       ...enemies,
       { name: randomName, distance: randomDistance, speed: randomSpeed },
     ]);
-
-    let maxDistance = Math.max(...enemies.map((enemy) => enemy.distance), 0);
-    setTowerRange(maxDistance);
   };
 
   const startGame = () => {
@@ -92,11 +106,6 @@ const TowerDefenseGame: React.FC = () => {
         }
       });
 
-      console.log(
-        `Расстояние до врагов после Шага ${step}, Хода ${currentTurn}:`,
-        enemies.map((enemy) => `${enemy.name}: ${enemy.distance}м`)
-      );
-
       if (defeated) {
         setTowerRange(towerRange * 2);
       }
@@ -105,7 +114,8 @@ const TowerDefenseGame: React.FC = () => {
     }
 
     if (!defeated) {
-      setGameResult(`Башня ВЫИГРЫВАЕТ за ${currentTurn} ходов`);
+      setGameResult(`Башня ВЫИГРЫВАЕТ за ${currentTurn} хода(ов)`);
+      console.log(`Башня ВЫИГРЫВАЕТ за ${currentTurn} хода(ов)`);
     } else {
       setGameResult(`Башня ПРОИГРЫВАЕТ`);
       calculateMinimumTowerRange();
@@ -119,12 +129,18 @@ const TowerDefenseGame: React.FC = () => {
   };
 
   const calculateMinimumTowerRange = () => {
+    if (enemies.length === 0 || turns === 0) {
+      console.log("Набор врагов пуст или количество ходов равно 0");
+      return;
+    }
+
     let maxSpeed = 0;
     enemies.forEach((enemy) => {
       if (enemy.speed > maxSpeed) {
         maxSpeed = enemy.speed;
       }
     });
+
     const minRange = maxSpeed * turns;
     console.log(
       `Минимальная дальность стрельбы башни для победы: ${minRange} м`
@@ -135,7 +151,11 @@ const TowerDefenseGame: React.FC = () => {
     <div>
       <h1>Игра "Защита башни"</h1>
       <label>Дальность стрельбы башни:</label>
-      <input type="number" value={towerRange} disabled />
+      <input
+        type="number"
+        value={towerRange}
+        onChange={(e) => setTowerRange(parseInt(e.target.value))}
+      />
       {enemies.map((enemy, index) => (
         <div key={index}>
           {editingIndex === index ? (
@@ -177,7 +197,9 @@ const TowerDefenseGame: React.FC = () => {
           )}
         </div>
       ))}
-      <button onClick={handleAddEnemy}>Добавить врага</button>
+      <button className="bg--500" onClick={handleAddEnemy}>
+        Добавить врага
+      </button>
       <button onClick={startGame}>Начать игру</button>
       {gameResult && <p>{gameResult}</p>}
     </div>
