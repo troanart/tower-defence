@@ -148,60 +148,107 @@ const TowerDefenseGame: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Игра "Защита башни"</h1>
-      <label>Дальность стрельбы башни:</label>
-      <input
-        type="number"
-        value={towerRange}
-        onChange={(e) => setTowerRange(parseInt(e.target.value))}
-      />
-      {enemies.map((enemy, index) => (
-        <div key={index}>
-          {editingIndex === index ? (
-            <>
-              <label>Имя врага:</label>
-              <input
-                type="text"
-                value={enemy.name}
-                onChange={(e) => handleInputChange(e, index, "name")}
-              />
-              <label>Начальное расстояние:</label>
-              <input
-                type="number"
-                value={enemy.distance}
-                onChange={(e) => handleInputChange(e, index, "distance")}
-              />
-              <label>Скорость:</label>
-              <input
-                type="number"
-                value={enemy.speed}
-                onChange={(e) => handleInputChange(e, index, "speed")}
-              />
-              <button onClick={() => handleSaveChanges(index)}>
-                Сохранить
-              </button>
-            </>
-          ) : (
-            <>
-              <span onDoubleClick={() => toggleEditMode(index)}>
-                Имя врага: {enemy.name}
-              </span>
-              <span onDoubleClick={() => toggleEditMode(index)}>
-                Начальное расстояние: {enemy.distance}
-              </span>
-              <span onDoubleClick={() => toggleEditMode(index)}>
-                Скорость: {enemy.speed}
-              </span>
-            </>
-          )}
-        </div>
-      ))}
-      <button className="bg--500" onClick={handleAddEnemy}>
-        Добавить врага
-      </button>
-      <button onClick={startGame}>Начать игру</button>
-      {gameResult && <p>{gameResult}</p>}
+    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border w-[1200px] border-emerald-500 px-12 rounded-md py-10">
+      <h1 className="text-2xl text-center mb-5 ">Игра "Защита башни"</h1>
+      <div className="mb-5 mx-auto flex items-center justify-center space-x-4">
+        <label className="text-lg">Дальность стрельбы башни:</label>
+        <input
+          className="tex-xl w-[250px] p-2  border border-emerald-500 rounded outline-none  mx-2 hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
+          type="number"
+          value={towerRange}
+          onChange={(e) => setTowerRange(parseInt(e.target.value))}
+        />
+        <button
+          className="bg-emerald-500 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
+          onClick={handleAddEnemy}>
+          Добавить врага
+        </button>
+        <button
+          className="bg-emerald-500 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
+          onClick={startGame}>
+          Начать игру
+        </button>
+      </div>
+      <div className="border m-auto w-[750px] relative px-4 py-8 rounded border-emerald-500">
+        <h2 className="top-0 left-0 bg-emerald-500 rounded text-lg absolute text-white w-fit p-1">
+          Список врагов
+        </h2>
+
+        <p className="text-sm bg-emerald-500 rounded text-white p-1 absolute top-0 right-0">
+          Кликните 2 раза на врага, чтобы изменить его параметры
+        </p>
+
+        {enemies.map((enemy, index) => (
+          <div key={index}>
+            <div
+              className={`border m-2 rounded p-2 ${
+                editingIndex === index ? "animate-pulse" : ""
+              }`}>
+              {editingIndex === index ? (
+                <>
+                  <label className="text-lg m-4">Имя врага:</label>
+                  <input
+                    className="tex-xl w-[120px] p-2  border border-emerald-500 rounded outline-none  mx-2 hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
+                    type="text"
+                    value={enemy.name}
+                    onChange={(e) => handleInputChange(e, index, "name")}
+                  />
+                  <label className="text-lg m-4">Начальное расстояние:</label>
+                  <input
+                    className="tex-xl w-[120px] p-2  border border-emerald-500 rounded outline-none  mx-2 hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
+                    type="number"
+                    value={enemy.distance}
+                    onChange={(e) => handleInputChange(e, index, "distance")}
+                  />
+                  <label className="text-lg m-4">Скорость:</label>
+                  <input
+                    className="tex-xl w-[120px] p-2  border border-emerald-500 rounded outline-none  mx-2 hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
+                    type="number"
+                    value={enemy.speed}
+                    onChange={(e) => handleInputChange(e, index, "speed")}
+                  />
+                  <button
+                    className="bg-emerald-500 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
+                    onClick={() => handleSaveChanges(index)}>
+                    Сохранить
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span
+                    className="text-lg m-4"
+                    onDoubleClick={() => toggleEditMode(index)}>
+                    Имя врага: {enemy.name}
+                  </span>
+                  <span
+                    className="text-lg m-4"
+                    onDoubleClick={() => toggleEditMode(index)}>
+                    Начальное расстояние: {enemy.distance}
+                  </span>
+                  <span
+                    className="text-lg m-4"
+                    onDoubleClick={() => toggleEditMode(index)}>
+                    Скорость: {enemy.speed}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className=" mt-5 text-2xl text-center">
+        {gameResult && (
+          <p
+            className={
+              gameResult.includes("ВЫИГРЫВАЕТ")
+                ? "text-emerald-500 font-bold"
+                : "text-red-500 font-bold"
+            }>
+            {gameResult}
+          </p>
+        )}
+      </div>
     </div>
   );
 };
