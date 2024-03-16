@@ -33,8 +33,7 @@ const TowerDefenseGame: React.FC = () => {
   const [turns, setTurns] = useState<number>(0);
   const [gameResult, setGameResult] = useState<string>("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [showRulesModal, setShowRulesModal] = useState<boolean>(false); // Состояние для управления видимостью модального окна
-
+  const [showRulesModal, setShowRulesModal] = useState<boolean>(false);
   const handleInputChange = useCallback(
     (
       e: React.ChangeEvent<HTMLInputElement>,
