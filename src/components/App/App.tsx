@@ -12,6 +12,7 @@ const TowerDefenseGame: React.FC = () => {
   const [turns, setTurns] = useState<number>(0);
   const [gameResult, setGameResult] = useState<string>("");
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [showRulesModal, setShowRulesModal] = useState<boolean>(false); // Состояние для управления видимостью модального окна
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -38,20 +39,16 @@ const TowerDefenseGame: React.FC = () => {
     let randomName = "";
     let isUnique = false;
 
-    // Повторяем генерацию имени до тех пор, пока не найдем уникальное
     while (!isUnique) {
       randomName = `Bot${Math.floor(Math.random() * 9) + 1}`;
 
-      // Проверяем, существует ли такое имя среди уже добавленных врагов
       if (!enemies.some((enemy) => enemy.name === randomName)) {
         isUnique = true;
       }
     }
 
-    // Генерация случайной дистанции, кратной 10 от 10 до 150
     const randomDistance = Math.floor(Math.random() * 15) * 10 + 10;
 
-    // Генерация случайной скорости, кратной 5 от 5 до 30
     const randomSpeed = (Math.floor(Math.random() * 6) + 1) * 5;
 
     setEnemies([
@@ -147,13 +144,21 @@ const TowerDefenseGame: React.FC = () => {
     );
   };
 
+  const openRulesModal = () => {
+    setShowRulesModal(true);
+  };
+
+  const closeRulesModal = () => {
+    setShowRulesModal(false);
+  };
+
   return (
-    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border w-[1200px] border-emerald-500 px-12 rounded-md py-10">
+    <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="text-2xl text-center mb-5 ">Игра "Защита башни"</h1>
-      <div className="mb-5 mx-auto flex items-center justify-center space-x-4">
+      <div className="mb-5 flex flex-wrap justify-center space-y-4 sm:space-y-0 sm:space-x-4">
         <label className="text-lg">Дальность стрельбы башни:</label>
         <input
-          className="tex-xl w-[250px] p-2  border border-emerald-500 rounded outline-none  mx-2 hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
+          className="text-xl sm:mb-5 md:mb-8 p-2 border border-emerald-500 rounded outline-none mx-2 hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
           type="number"
           value={towerRange}
           onChange={(e) => setTowerRange(parseInt(e.target.value))}
@@ -168,16 +173,16 @@ const TowerDefenseGame: React.FC = () => {
           onClick={startGame}>
           Начать игру
         </button>
+        <button
+          className="bg-emerald-500 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
+          onClick={openRulesModal}>
+          Показать правила
+        </button>
       </div>
-      <div className="border m-auto w-[750px] relative px-4 py-8 rounded border-emerald-500">
+      <div className="border mx-auto w-full sm:w-[750px] relative px-4 py-8 rounded border-emerald-500">
         <h2 className="top-0 left-0 bg-emerald-500 rounded text-lg absolute text-white w-fit p-1">
           Список врагов
         </h2>
-
-        <p className="text-sm bg-emerald-500 rounded text-white p-1 absolute top-0 right-0">
-          Кликните 2 раза на врага, чтобы изменить его параметры
-        </p>
-
         {enemies.map((enemy, index) => (
           <div key={index}>
             <div
@@ -249,6 +254,30 @@ const TowerDefenseGame: React.FC = () => {
           </p>
         )}
       </div>
+
+      {showRulesModal && (
+        <div className="fixed top-0 left-0 z-50 w-full h-full  bg-gray-800 bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-8 max-w-[350px] rounded-md">
+            <h2 className="text-2xl mb-4">Правила игры</h2>
+
+            <p className="mb-2">
+              1) На каждом ходу сначала башня стреляет один раз, затем каждый
+              враг перемещается к башне.
+            </p>
+
+            <p className="mb-2"> 2) Нужно убить врагов как можно быстрее</p>
+            <p className="mb-2">
+              {" "}
+              3) Если враг достигнет башни, вы проиграете.
+            </p>
+            <button
+              className="bg-emerald-500 text-white px-4 py-2 rounded-md mt-4"
+              onClick={closeRulesModal}>
+              Закрыть
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
