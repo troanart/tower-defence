@@ -1,10 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 
 interface Enemy {
   name: string;
   distance: number;
   speed: number;
 }
+
+const labels = {
+  NO_ENEMIS: "В настоящее время врагов нет.",
+  GAME_NAME: 'Игра "Защита башни',
+  SHOT_RANGE: "Дальность стрельбы башни:",
+  ADD_ENEMI: "Добавить врага",
+  START_GAME: "Начать игру",
+  SHOW_RULES: "Показать правила",
+  ENEMI_LIST: "Список врагов",
+  ENEMI_NAME: "Имя врага:",
+  DISTANCE: "Начальное расстояние:",
+  SPEED: "Скорость:",
+  SAVE: "Сохранить",
+  CLUE: " Кликните 2 раза на врага, чтобы изменить его параметры",
+  GAME_RULES: "Правила игры",
+  CONDITION_1:
+    " 1) На каждом ходу сначала башня стреляет один раз, затем каждый враг перемещается к башне.",
+  CONDITION_2: "2) Нужно убить врагов как можно быстрее",
+  CONDITION_3: "3) Если враг достигнет башни, вы проиграете.",
+  CLOSE_RULES: "Закрыть",
+};
 
 const TowerDefenseGame: React.FC = () => {
   const [towerRange, setTowerRange] = useState<number>(50);
@@ -14,24 +35,28 @@ const TowerDefenseGame: React.FC = () => {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [showRulesModal, setShowRulesModal] = useState<boolean>(false); // Состояние для управления видимостью модального окна
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number,
-    key: keyof Enemy
-  ) => {
-    const newEnemies = [...enemies];
-    newEnemies[index] = {
-      ...newEnemies[index],
-      [key]: parseInt(e.target.value),
-    };
-    setEnemies(newEnemies);
-  };
+  const handleInputChange = useCallback(
+    (
+      e: React.ChangeEvent<HTMLInputElement>,
+      index: number,
+      key: keyof Enemy
+    ) => {
+      const newEnemies = [...enemies];
+      newEnemies[index] = {
+        ...newEnemies[index],
+        [key]: parseInt(e.target.value),
+      };
+      setEnemies(newEnemies);
+    },
+    [enemies]
+  );
 
   const handleSaveChanges = (index: number) => {
     setEditingIndex(null);
   };
 
-  const handleAddEnemy = () => {
+  const handleAddEnemy = useCallback(() => {
+    setGameResult("");
     if (enemies.length >= 9) {
       alert("Вы не можете добавить больше 9 врагов.");
       return;
@@ -51,24 +76,32 @@ const TowerDefenseGame: React.FC = () => {
 
     const randomSpeed = (Math.floor(Math.random() * 6) + 1) * 5;
 
-    setEnemies([
-      ...enemies,
+    setEnemies((prevEnemies) => [
+      ...prevEnemies,
       { name: randomName, distance: randomDistance, speed: randomSpeed },
     ]);
-  };
+  }, [enemies]);
 
-  const startGame = () => {
-    if (
-      enemies.length === 0 ||
-      enemies.some((enemy) => enemy.name.trim() === "")
-    ) {
-      setGameResult("Добавьте врагов с корректными именами перед началом игры");
+  const calculateMinimumTowerRange = useCallback(() => {
+    if (enemies.length === 0 || turns === 0) {
+      console.log("Набор врагов пуст или количество ходов равно 0");
       return;
     }
-    playTurns();
-  };
 
-  const playTurns = () => {
+    let maxSpeed = 0;
+    enemies.forEach((enemy) => {
+      if (enemy.speed > maxSpeed) {
+        maxSpeed = enemy.speed;
+      }
+    });
+
+    const minRange = maxSpeed * turns;
+    console.log(
+      `Минимальная дальность стрельбы башни для победы: ${minRange} м`
+    );
+  }, [enemies, turns]);
+
+  const playTurns = useCallback(() => {
     let currentTurn = 0;
     let step = 1;
     let defeated = false;
@@ -91,7 +124,7 @@ const TowerDefenseGame: React.FC = () => {
       if (closestEnemyIndex !== -1) {
         const closestEnemy = enemies[closestEnemyIndex];
         console.log(
-          ` Ход ${currentTurn}: Убит ${closestEnemy.name} на дистанции в ${closestEnemy.distance} м`
+          `Ход ${currentTurn}: Убит ${closestEnemy.name} на дистанции в ${closestEnemy.distance} м`
         );
         enemies.splice(closestEnemyIndex, 1);
       }
@@ -114,35 +147,34 @@ const TowerDefenseGame: React.FC = () => {
       setGameResult(`Башня ВЫИГРЫВАЕТ за ${currentTurn} хода(ов)`);
       console.log(`Башня ВЫИГРЫВАЕТ за ${currentTurn} хода(ов)`);
     } else {
-      setGameResult(`Башня ПРОИГРЫВАЕТ`);
+      setGameResult("Башня ПРОИГРЫВАЕТ");
       calculateMinimumTowerRange();
     }
 
     setTurns(currentTurn);
-  };
+  }, [
+    enemies,
+    towerRange,
+    setTowerRange,
+    setGameResult,
+    calculateMinimumTowerRange,
+  ]);
 
-  const toggleEditMode = (index: number) => {
-    setEditingIndex(index === editingIndex ? null : index);
-  };
-
-  const calculateMinimumTowerRange = () => {
-    if (enemies.length === 0 || turns === 0) {
-      console.log("Набор врагов пуст или количество ходов равно 0");
+  const startGame = useCallback(() => {
+    setGameResult("");
+    if (
+      enemies.length === 0 ||
+      enemies.some((enemy) => enemy.name.trim() === "")
+    ) {
+      setGameResult("Добавьте врагов с корректными именами перед началом игры");
       return;
     }
+    playTurns();
+  }, [enemies, playTurns]);
 
-    let maxSpeed = 0;
-    enemies.forEach((enemy) => {
-      if (enemy.speed > maxSpeed) {
-        maxSpeed = enemy.speed;
-      }
-    });
-
-    const minRange = maxSpeed * turns;
-    console.log(
-      `Минимальная дальность стрельбы башни для победы: ${minRange} м`
-    );
-  };
+  const toggleEditMode = useCallback((index: number) => {
+    setEditingIndex((prevIndex) => (prevIndex === index ? null : index));
+  }, []);
 
   const openRulesModal = () => {
     setShowRulesModal(true);
@@ -153,36 +185,41 @@ const TowerDefenseGame: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-2xl text-center mb-5 ">Игра "Защита башни"</h1>
-      <div className="mb-5 flex flex-wrap justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-        <label className="text-lg">Дальность стрельбы башни:</label>
+    <div className="container mx-auto px-4 py-8  lg:px-8 lg:max-w-[1000px] ">
+      <h1 className="text-2xl text-center mb-5 ">{labels.GAME_NAME}</h1>
+      <div className="mb-5 flex flex-wrap items-baseline justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+        <label className="text-lg">{labels.SHOT_RANGE}</label>
         <input
-          className="text-xl sm:mb-5 md:mb-8 p-2 border border-emerald-500 rounded outline-none mx-2 hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
+          className="text-xl  p-2 border border-emerald-500 rounded outline-none  hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
           type="number"
           value={towerRange}
           onChange={(e) => setTowerRange(parseInt(e.target.value))}
         />
-        <button
-          className="bg-emerald-500 mx-1 mt-1 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
-          onClick={handleAddEnemy}>
-          Добавить врага
-        </button>
-        <button
-          className="bg-emerald-500 mx-1  mt-1  text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
-          onClick={startGame}>
-          Начать игру
-        </button>
-        <button
-          className="bg-emerald-500 mx-1 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
-          onClick={openRulesModal}>
-          Показать правила
-        </button>
+        <div className="flex w-full sm:pt-4  justify-between  lg:justify-center  lg:mt-5">
+          <button
+            className="bg-emerald-500  mx-1 mt-1 lg:mx-8 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
+            onClick={handleAddEnemy}>
+            {labels.ADD_ENEMI}
+          </button>
+          <button
+            className="bg-emerald-500 mx-1  mt-1 lg:mx-8  text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
+            onClick={startGame}>
+            {labels.START_GAME}
+          </button>
+          <button
+            className="bg-emerald-500 mx-1  lg:mx-8 mt-1 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
+            onClick={openRulesModal}>
+            {labels.SHOW_RULES}
+          </button>
+        </div>
       </div>
-      <div className="border mx-auto w-full sm:w-[750px] relative px-4 py-8 rounded border-emerald-500">
+      <div className="border mx-auto w-full  relative px-4 py-8 rounded border-emerald-500">
         <h2 className="top-0 left-0 bg-emerald-500 rounded text-lg absolute text-white w-fit p-1">
-          Список врагов
+          {labels.ENEMI_LIST}
         </h2>
+        {enemies.length === 0 && (
+          <p className="text-lg text-center">{labels.NO_ENEMIS}</p>
+        )}
         {enemies.map((enemy, index) => (
           <div key={index}>
             <div
@@ -191,23 +228,23 @@ const TowerDefenseGame: React.FC = () => {
               }`}>
               {editingIndex === index ? (
                 <>
-                  <label className="text-lg m-4">Имя врага:</label>
+                  <label className="text-lg m-2"> {labels.ENEMI_NAME}</label>
                   <input
-                    className="tex-xl w-[120px] p-2  border border-emerald-500 rounded outline-none  mx-2 hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
+                    className="tex-xl w-[95px] p-2  border border-emerald-500 rounded outline-none  mx-2 hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
                     type="text"
                     value={enemy.name}
                     onChange={(e) => handleInputChange(e, index, "name")}
                   />
-                  <label className="text-lg m-4">Начальное расстояние:</label>
+                  <label className="text-lg m-2"> {labels.DISTANCE}</label>
                   <input
-                    className="tex-xl w-[120px] p-2  border border-emerald-500 rounded outline-none  mx-2 hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
+                    className="tex-xl w-[95px] p-2  border border-emerald-500 rounded outline-none  mx-2 hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
                     type="number"
                     value={enemy.distance}
                     onChange={(e) => handleInputChange(e, index, "distance")}
                   />
-                  <label className="text-lg m-4">Скорость:</label>
+                  <label className="text-lg m-2"> {labels.SPEED}</label>
                   <input
-                    className="tex-xl w-[120px] p-2  border border-emerald-500 rounded outline-none  mx-2 hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
+                    className="tex-xl w-[95px] p-2  border border-emerald-500 rounded outline-none  mx-2 hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
                     type="number"
                     value={enemy.speed}
                     onChange={(e) => handleInputChange(e, index, "speed")}
@@ -215,7 +252,7 @@ const TowerDefenseGame: React.FC = () => {
                   <button
                     className="bg-emerald-500 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
                     onClick={() => handleSaveChanges(index)}>
-                    Сохранить
+                    {labels.SAVE}
                   </button>
                 </>
               ) : (
@@ -223,17 +260,17 @@ const TowerDefenseGame: React.FC = () => {
                   <span
                     className="text-lg m-4"
                     onDoubleClick={() => toggleEditMode(index)}>
-                    Имя врага: {enemy.name}
+                    {labels.ENEMI_NAME} {enemy.name}
                   </span>
                   <span
                     className="text-lg m-4"
                     onDoubleClick={() => toggleEditMode(index)}>
-                    Начальное расстояние: {enemy.distance}
+                    {labels.DISTANCE} {enemy.distance}
                   </span>
                   <span
                     className="text-lg m-4"
                     onDoubleClick={() => toggleEditMode(index)}>
-                    Скорость: {enemy.speed}
+                    {labels.SPEED} {enemy.speed}
                   </span>
                 </>
               )}
@@ -241,6 +278,10 @@ const TowerDefenseGame: React.FC = () => {
           </div>
         ))}
       </div>
+
+      <p className="text-sm mt-5 bg-emerald-500 rounded w-fit mx-auto text-white p-1">
+        {labels.CLUE}
+      </p>
 
       <div className=" mt-5 text-2xl text-center">
         {gameResult && (
@@ -258,22 +299,15 @@ const TowerDefenseGame: React.FC = () => {
       {showRulesModal && (
         <div className="fixed top-0 left-0 z-50 w-full h-full  bg-gray-800 bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-8 max-w-[350px] rounded-md">
-            <h2 className="text-2xl mb-4">Правила игры</h2>
+            <h2 className="text-2xl mb-4"> {labels.GAME_RULES}</h2>
 
-            <p className="mb-2">
-              1) На каждом ходу сначала башня стреляет один раз, затем каждый
-              враг перемещается к башне.
-            </p>
-
-            <p className="mb-2"> 2) Нужно убить врагов как можно быстрее</p>
-            <p className="mb-2">
-              {" "}
-              3) Если враг достигнет башни, вы проиграете.
-            </p>
+            <p className="mb-2">{labels.CONDITION_1}</p>
+            <p className="mb-2"> {labels.CONDITION_2}</p>
+            <p className="mb-2">{labels.CONDITION_3}</p>
             <button
               className="bg-emerald-500 text-white px-4 py-2 rounded-md mt-4"
               onClick={closeRulesModal}>
-              Закрыть
+              {labels.CLOSE_RULES}
             </button>
           </div>
         </div>
