@@ -50,7 +50,7 @@ const TowerDefenseGame: React.FC = () => {
     [enemies]
   );
 
-  const handleSaveChanges = (index: number) => {
+  const handleSaveChanges = () => {
     setEditingIndex(null);
   };
 
@@ -250,7 +250,7 @@ const TowerDefenseGame: React.FC = () => {
                   />
                   <button
                     className="bg-emerald-500 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
-                    onClick={() => handleSaveChanges(index)}>
+                    onClick={() => handleSaveChanges()}>
                     {labels.SAVE}
                   </button>
                 </>
