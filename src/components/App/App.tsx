@@ -8,13 +8,13 @@ interface Enemy {
 
 const labels = {
   NO_ENEMIS: "В настоящее время врагов нет.",
-  GAME_NAME: 'Игра "Защита башни',
+  GAME_NAME: 'Игра "Защита башни"',
   SHOT_RANGE: "Дальность стрельбы башни:",
-  ADD_ENEMI: "Добавить врага",
+  ADD_ENEMIES: "Добавить врага",
   START_GAME: "Начать игру",
   SHOW_RULES: "Показать правила",
-  ENEMI_LIST: "Список врагов",
-  ENEMI_NAME: "Имя врага:",
+  ENEMY_LIST: "Список врагов",
+  ENEMY_NAME: "Имя врага:",
   DISTANCE: "Начальное расстояние:",
   SPEED: "Скорость:",
   SAVE: "Сохранить",
@@ -198,7 +198,7 @@ const TowerDefenseGame: React.FC = () => {
           <button
             className="bg-emerald-500  mx-1 mt-1 lg:mx-8 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
             onClick={handleAddEnemy}>
-            {labels.ADD_ENEMI}
+            {labels.ADD_ENEMIES}
           </button>
           <button
             className="bg-emerald-500 mx-1  mt-1 lg:mx-8  text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
@@ -214,7 +214,7 @@ const TowerDefenseGame: React.FC = () => {
       </div>
       <div className="border mx-auto w-full  relative px-4 py-8 rounded border-emerald-500">
         <h2 className="top-0 left-0 bg-emerald-500 rounded text-lg absolute text-white w-fit p-1">
-          {labels.ENEMI_LIST}
+          {labels.ENEMY_LIST}
         </h2>
         {enemies.length === 0 && (
           <p className="text-lg text-center">{labels.NO_ENEMIS}</p>
@@ -227,7 +227,7 @@ const TowerDefenseGame: React.FC = () => {
               }`}>
               {editingIndex === index ? (
                 <>
-                  <label className="text-lg m-2"> {labels.ENEMI_NAME}</label>
+                  <label className="text-lg m-2"> {labels.ENEMY_NAME}</label>
                   <input
                     className="tex-xl w-[95px] p-2  border border-emerald-500 rounded outline-none  mx-2 hover:border-sky-600 focus:border-sky-600 transition-colors duration-300"
                     type="text"
@@ -259,7 +259,7 @@ const TowerDefenseGame: React.FC = () => {
                   <span
                     className="text-lg m-4"
                     onDoubleClick={() => toggleEditMode(index)}>
-                    {labels.ENEMI_NAME} {enemy.name}
+                    {labels.ENEMY_NAME} {enemy.name}
                   </span>
                   <span
                     className="text-lg m-4"
