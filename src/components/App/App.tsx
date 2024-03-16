@@ -164,17 +164,17 @@ const TowerDefenseGame: React.FC = () => {
           onChange={(e) => setTowerRange(parseInt(e.target.value))}
         />
         <button
-          className="bg-emerald-500 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
+          className="bg-emerald-500 mx-1 mt-1 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
           onClick={handleAddEnemy}>
           Добавить врага
         </button>
         <button
-          className="bg-emerald-500 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
+          className="bg-emerald-500 mx-1  mt-1  text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
           onClick={startGame}>
           Начать игру
         </button>
         <button
-          className="bg-emerald-500 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
+          className="bg-emerald-500 mx-1 text-white p-2 rounded-md border border-emerald-500 hover:bg-emerald-600 transition-colors duration-300"
           onClick={openRulesModal}>
           Показать правила
         </button>
